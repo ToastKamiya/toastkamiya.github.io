@@ -31,13 +31,38 @@
             display: flex; align-items: center; justify-content: center; padding: 60px 40px;
         }
 
+.scroll-indicator {
+    position: fixed; /* Keep it relative to the screen */
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: opacity 0.4s ease, visibility 0.4s;
+    z-index: 100;
+    pointer-events: none; /* So it doesn't block clicks */
+}
+
+.scroll-indicator.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.scroll-indicator i {
+    animation: bobbing 2s infinite ease-in-out;
+}
+
+@keyframes bobbing {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(10px); }
+}
+
         .container-fluid { max-width: 1200px; height: 100%; display: flex; flex-direction: column; }
 
         /* --- Reusable Components --- */
         .panel, .interactive-panel, .modal-content-wrapper { border-radius: var(--br-lg); padding: 2rem; }
-
         .panel { background: var(--panel-gradient); box-shadow: var(--shadow-standard); transition: transform 0.3s ease; }
-
         .hoverable:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(75, 112, 245, 0.6); }
 
         .btn-custom {
@@ -55,8 +80,7 @@
         .folder-title:hover { height: 79px; top: -60px; }
 
         .interactive-panel { background: black; box-shadow: 0 10px 30px black; outline: 5px solid white; }
-
-        .profile-img { width: 160px; height: 160px; background: #eee; object-fit: cover; color: black; }
+        .profile-img { background-size: contain; width: 160px; height: 160px; color: black; background-image: url("https://prawnhub.org/files/logomine.png")}
 
         .screenshot-stack { position: relative; height: 300px; margin-top: 180px; }
         .screenshot {
@@ -64,8 +88,8 @@
             border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.5);
             transform-style: preserve-3d; background-size: cover; background-repeat: no-repeat;
         }
-        .s1 { left: -15%; top: 5%; z-index: 11; transform: rotate(-5deg); background-image: url("https://github.com/ToastKamiya/toastcut/raw/main/assets/screenshot.png"); }
-        .s2 { left: 28%; top: 20px; z-index: 12; transform: rotate(2deg); background-color: #444; }
+        .s1 { cursor:pointer; left: -15%; top: 5%; z-index: 11; transform: rotate(-5deg); background-image: url("https://github.com/ToastKamiya/toastcut/raw/main/assets/screenshot.png"); }
+        .s2 { left: 28%; top: 20px; z-index: 12; transform: rotate(2deg); background-image: url("https://prawnhub.org/files/s3project.png"); }
         .s3 { left: 68%; top: 40px; z-index: 13; transform: rotate(-2deg); background-image: url("https://prawnhub.org/files/s2project.png"); }
 
         .img-placeholder {
@@ -88,26 +112,17 @@
         .close-btn { position: absolute; right: 40px; top: 30px; font-size: 3rem; cursor: pointer; opacity: 0.8; }
         .close-btn:hover { opacity: 0.5; }
 
-        .matrix-container {
-            position: relative;
-            overflow: hidden;
-            z-index: 1; /* Creates a new stacking context */
-        }
+        /* --- Neural Chart Styles --- */
+        .segment { fill: none; stroke-width: 35; transition: 0.4s; stroke-linecap: round; cursor: pointer; }
+        .segment:hover { stroke-width: 50; filter: drop-shadow(0 0 12px currentColor); }
+        #matrix-overlay { mask-image: radial-gradient(circle, black 40%, transparent 70%); opacity: 0.15; pointer-events: none; }
 
-        /* Ensure the contact content stays above the green code */
-        .matrix-container .container-fluid {
-            position: relative;
-            z-index: 2;
-        }
-
+        /* --- Matrix Contact Styles --- */
+        .matrix-container { position: relative; overflow: hidden; z-index: 1; }
+        .matrix-container .container-fluid { position: relative; z-index: 2; }
         #matrixCanvas {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 40%; /* Adjust as needed */
-            z-index: 0; /* Behind the container-fluid */
-            pointer-events: none;
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 40%;
+            z-index: 0; pointer-events: none;
             -webkit-mask-image: linear-gradient(to bottom, transparent, black);
             mask-image: linear-gradient(to bottom, transparent, black);
         }
@@ -118,14 +133,27 @@
 
         h2 { font-weight: 700; }
         p { opacity: 0.8; }
+
+        .preview-card:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: calc(var(--shadow-val) + 8px) calc(var(--shadow-val) + 8px) 0px var(--brand-contrast) !important;
+        }
+
+        .mobile-view {
+            width: 375px !important;
+            height: 667px !important;
+            border: 12px solid #1a1a1a !important;
+            border-radius: 40px !important;
+        }
     </style>
 </head>
 <body>
-    <section>
+    <!-- Intro Section -->
+    <section id="intro">
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center w-100">
                 <h2 class="display-3 m-0">I am<br><strong>Ugnius K.</strong></h2>
-                <div class="profile-img"><br>Logo</div>
+                <div class="profile-img" title="This logo is a placeholder."><br></div>
             </div>
             <div class="screenshot-stack">
                 <div onclick="location.href='https://github.com/ToastKamiya/toastcut/';" class="screenshot s1"><div class="panel folder-title">View</div></div>
@@ -133,8 +161,14 @@
                 <div class="screenshot s3"><div class="panel folder-title">View</div></div>
             </div>
         </div>
+                <!-- Scroll Indicator -->
+        <div id="scroll-indicator" class="scroll-indicator">
+            <p class="small mb-1 opacity-50">Scroll Down</p>
+            <i class="bi bi-chevron-down fs-3"></i>
+        </div>
     </section>
 
+    <!-- Projects Section -->
     <section>
         <div class="container-fluid">
             <h2 class="display-4 mb-5">My Projects</h2>
@@ -150,7 +184,7 @@
                 <div class="col-md-4">
                     <div class="panel hoverable h-100 d-flex flex-column">
                         <h2>RaceTracks</h2>
-                        <div class="img-placeholder"></div>
+                        <div class="img-placeholder" style="background-image:  url('https://prawnhub.org/files/s3project.png')"></div>
                         <p class="flex-grow-1">University group project focused on UI, programming simplicity, and user permission compatibility.</p>
                         <button class="btn btn-custom" onclick="openModal('RaceTracksSystem')">Learn More</button>
                     </div>
@@ -167,123 +201,86 @@
         </div>
     </section>
 
+    <!-- Principles Section (Integrated Neural Chart) -->
     <section>
         <div class="container-fluid" style="max-width:1600px !important">
-            <h2 class="display-4 mb-5 px-md-5">My core principles</h2>
-            <div class="row g-5 flex-grow-1 justify-content-center">
-                <div class="col-md-3"><div class="panel hoverable h-75"><h2>Focused</h2><p>Eliminating noise to move the needle.</p></div></div>
-                <div class="col-md-4"><div class="panel hoverable h-100"><h2>Light</h2><p>Efficiency with zero bloat.</p></div></div>
-                <div class="col-md-3"><div class="panel hoverable h-75"><h2>Fast</h2><p>Zero latency, optimized for speed.</p></div></div>
+            <h2 class="display-4 px-md-5 text-center">My experience, visualized. </h2>
+            
+            <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+                <div class="relative w-[600px] h-[600px] d-flex align-items-center justify-content-center" style="width: 800px; height: 800px; position: relative;">
+                    <canvas id="matrix-overlay" style="position: absolute; inset: 0; width: 800px; height: 800px;"></canvas>
+                    
+                    <!-- Center Info Card -->
+                    <div class="absolute d-flex flex-column justify-content-center align-items-center text-center shadow-2xl" 
+                         style="position: absolute; z-index: 30; width: 220px; height: 220px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); pointer-events: none;">
+                        <div id="lbl" style="font-size: 1rem;  text-transform: uppercase; letter-spacing: 0.2em;">LANGUAGES I KNOW</div>
+                        <div id="val" style="font-size: 2rem; font-weight: 900; margin: 4px 0; transition: color 0.3s;">Experience  </div>
+                        <div id="det" style="font-size: 0.65rem; max-width: 150px;">Hover elements to inspect</div>
+                    </div>
+
+                    <!-- SVG Chart -->
+                    <svg viewBox="0 0 600 600" style="transform: rotate(-90deg); width: 100%; height: 100%; position: relative; z-index: 20;">
+                        <g id="con"></g>
+                        <g id="seg"></g>
+                        <circle cx="300" cy="300" r="4" fill="white" style="filter:drop-shadow(0 0 8px white)"/>
+                    </svg>
+                </div>
             </div>
         </div>
     </section>
 
-<section>
-    <div class="container-fluid">
-        <h2 class="display-4 mb-4 px-md-5 text-white">Explore my design</h2>
-        <div class="row g-5 flex-grow-1 align-items-stretch">
-
-            <div class="col-md-4">
-                <div class="panel static h-100 d-flex flex-column gap-4">
-
-                    <div>
-                        <label class="form-label fw-bold d-flex justify-content-between">
-                            Playfulness
-                        </label>
-                        <input type="range" class="form-range" id="playfulness" min="1" max="4" step="1" value="2">
-                        <div class="d-flex justify-content-between small opacity-50">
-                            <span>Muted</span><span>Exaggerated</span>
+    <!-- Design Section -->
+    <section>
+        <div class="container-fluid">
+            <h2 class="display-4 mb-4 px-md-5 text-white">Explore my design</h2>
+            <div class="row g-5 flex-grow-1 align-items-stretch">
+                <div class="col-md-4">
+                    <div class="panel static h-100 d-flex flex-column gap-4">
+                        <div>
+                            <label class="form-label fw-bold d-flex justify-content-between">Playfulness</label>
+                            <input type="range" class="form-range" id="playfulness" min="1" max="4" step="1" value="2">
+                            <div class="d-flex justify-content-between small opacity-50"><span>Muted</span><span>Exaggerated</span></div>
                         </div>
-                    </div>
-
-                    <div>
-                        <label class="form-label fw-bold">Brand Identity</label>
-                        <input type="color" class="form-control form-control-color w-100" id="baseColor" value="#4C3BCF">
-                    </div>
-
-                    <div>
-                        <label class="form-label fw-bold d-flex justify-content-between">
-                            Minimalism
-                        </label>
-                        <input type="range" class="form-range" id="minimalism" min="1" max="4" step="1" value="3">
-                        <div class="d-flex justify-content-between small opacity-50">
-                            <span>None</span><span>Extreme</span>
+                        <div>
+                            <label class="form-label fw-bold">Brand Identity</label>
+                            <input type="color" class="form-control form-control-color w-100" id="baseColor" value="#4C3BCF">
                         </div>
-                    </div>
-
-                    <div>
-                        <label class="fw-bold mb-2 d-block">Device View</label>
-                        <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="viewMode" id="viewDesktop" checked>
-                            <label class="btn btn-outline-light py-2" for="viewDesktop">Desktop</label>
-
-                            <input type="radio" class="btn-check" name="viewMode" id="viewMobile">
-                            <label class="btn btn-outline-light py-2" for="viewMobile">Mobile</label>
+                        <div>
+                            <label class="form-label fw-bold d-flex justify-content-between">Minimalism</label>
+                            <input type="range" class="form-range" id="minimalism" min="1" max="4" step="1" value="3">
+                            <div class="d-flex justify-content-between small opacity-50"><span>None</span><span>Extreme</span></div>
+                        </div>
+                        <div>
+                            <label class="fw-bold mb-2 d-block">Device View</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="viewMode" id="viewDesktop" checked>
+                                <label class="btn btn-outline-light py-2" for="viewDesktop">Desktop</label>
+                                <input type="radio" class="btn-check" name="viewMode" id="viewMobile">
+                                <label class="btn btn-outline-light py-2" for="viewMobile">Mobile</label>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-md-8 d-flex align-items-center justify-content-center">
-                <div id="viewportContainer" class="interactive-panel p-0 overflow-hidden" style="
-                    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-                    width: 100%;
-                    height: 100%;
-                    background: #e0e0e0;
-                    outline: 4px solid white;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                ">
-                    <div id="mockSite" class="h-100 w-100 d-flex flex-column" style="
-                        --brand: #4C3BCF;
-                        --brand-contrast: #4C3BCF;
-                        --bg-site: #ffffff;
-                        --bounce: cubic-bezier(0.4, 0, 0.2, 1);
-                        --shadow-val: 20px;
-                        --border-w: 2px;
-                        --weight: 400;
-                        background: var(--bg-site);
-                        color: #000;
-                    ">
-                        <nav class="d-flex justify-content-between align-items-center p-4" style="border-bottom: var(--border-w) solid var(--brand-contrast);">
-                            <div class="fw-bold" style="color: var(--brand); font-size: 1.5rem; transition: font-weight 0.4s var(--bounce); font-weight: calc(var(--weight) + 200);">STUDIO.</div>
-                            <div class="d-flex gap-3 align-items-center" style="font-weight: var(--weight);">
-                                <span class="d-none d-sm-block">Work</span>
-                                <div class="px-4 py-2 text-white shadow-sm" style="background: var(--brand); border-radius: 4px; border: var(--border-w) solid #000; font-weight: 700;">Hire</div>
-                            </div>
-                        </nav>
-
-                        <div class="flex-grow-1 px-5 py-2 d-flex flex-column justify-content-center">
-                            <h1 class="display-4 mb-3" style="font-weight: var(--weight); transition: all 0.4s var(--bounce);">
-                                Design <span style="color: var(--brand); text-decoration: underline;">System</span>
-                            </h1>
-                            <p class="mb-5 fs-5" style="font-weight: var(--weight); opacity: 0.8;">Testing contrast and playfulness levels.</p>
-
-                            <div class="row g-4">
-                                <div class="col-6">
-                                    <div class="p-4 preview-card" style="
-                                        background: #fff;
-                                        border: var(--border-w) solid var(--brand-contrast);
-                                        box-shadow: var(--shadow-val) var(--shadow-val) 0px rgba(0,0,0,0.1);
-                                        transition: all 0.4s var(--bounce);
-                                        border-radius: 8px;
-                                    ">
-                                        <div class="mb-3" style="width:40px; height:8px; background: var(--brand);"></div>
-                                        <div style="height:12px; width:100%; background: #eee;"></div>
-                                    </div>
+                <div class="col-md-8 d-flex align-items-center justify-content-center">
+                    <div id="viewportContainer" class="interactive-panel p-0 overflow-hidden" style="transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); width: 100%; height: 100%; background: #e0e0e0; outline: 4px solid white; display: flex; justify-content: center; align-items: center;">
+                        <div id="mockSite" class="h-100 w-100 d-flex flex-column" style="--brand: #4C3BCF; --brand-contrast: #4C3BCF; --bg-site: #ffffff; --bounce: cubic-bezier(0.4, 0, 0.2, 1); --shadow-val: 20px; --border-w: 2px; --weight: 400; background: var(--bg-site); color: #000;">
+                            <nav class="d-flex justify-content-between align-items-center p-4" style="border-bottom: var(--border-w) solid var(--brand-contrast);">
+                                <div class="fw-bold" style="color: var(--brand); font-size: 1.5rem; transition: font-weight 0.4s var(--bounce); font-weight: calc(var(--weight) + 200);">STUDIO.</div>
+                                <div class="d-flex gap-3 align-items-center" style="font-weight: var(--weight);">
+                                    <span class="d-none d-sm-block">Work</span>
+                                    <div class="px-4 py-2 text-white shadow-sm" style="background: var(--brand); border-radius: 4px; border: var(--border-w) solid #000; font-weight: 700;">Hire</div>
                                 </div>
-                                <div class="col-6">
-                                    <div class="p-4 preview-card" style="
-                                        background: var(--brand);
-                                        color: white;
-                                        border: var(--border-w) solid #000;
-                                        box-shadow: var(--shadow-val) var(--shadow-val) 0px rgba(0,0,0,0.15);
-                                        transition: all 0.4s var(--bounce);
-                                        border-radius: 8px;
-                                    ">
-                                        <div class="mb-3" style="width:20px; height:20px; border: 2px solid #fff; border-radius: 50%;"></div>
-                                        <div style="height:12px; width:60%; background: rgba(255,255,255,0.3);"></div>
+                            </nav>
+                            <div class="flex-grow-1 px-5 py-2 d-flex flex-column justify-content-center">
+                                <h1 class="display-4 mb-3" style="font-weight: var(--weight); transition: all 0.4s var(--bounce);">Design <span style="color: var(--brand); text-decoration: underline;">System</span></h1>
+                                <p class="mb-5 fs-5" style="font-weight: var(--weight); opacity: 0.8;">Testing contrast and playfulness levels.</p>
+                                <div class="row g-4">
+                                    <div class="col-6">
+                                        <div class="p-4 preview-card" style="background: #fff; border: var(--border-w) solid var(--brand-contrast); box-shadow: var(--shadow-val) var(--shadow-val) 0px rgba(0,0,0,0.1); transition: all 0.4s var(--bounce); border-radius: 8px;"><div class="mb-3" style="width:40px; height:8px; background: var(--brand);"></div><div style="height:12px; width:100%; background: #eee;"></div></div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-4 preview-card" style="background: var(--brand); color: white; border: var(--border-w) solid #000; box-shadow: var(--shadow-val) var(--shadow-val) 0px rgba(0,0,0,0.15); transition: all 0.4s var(--bounce); border-radius: 8px;"><div class="mb-3" style="width:20px; height:20px; border: 2px solid #fff; border-radius: 50%;"></div><div style="height:12px; width:60%; background: rgba(255,255,255,0.3);"></div></div>
                                     </div>
                                 </div>
                             </div>
@@ -292,144 +289,66 @@
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<style>
-    .preview-card:hover {
-        transform: translate(-4px, -4px);
-        box-shadow: calc(var(--shadow-val) + 8px) calc(var(--shadow-val) + 8px) 0px var(--brand-contrast) !important;
-    }
-
-    .mobile-view {
-        width: 375px !important;
-        height: 667px !important;
-        border: 12px solid #1a1a1a !important;
-        border-radius: 40px !important;
-    }
-</style>
-
-<script>
-    const mockSite = document.getElementById('mockSite');
-    const viewport = document.getElementById('viewportContainer');
-    const playful = document.getElementById('playfulness');
-    const color = document.getElementById('baseColor');
-    const minimal = document.getElementById('minimalism');
-    const viewDesktop = document.getElementById('viewDesktop');
-    const viewMobile = document.getElementById('viewMobile');
-
-    function updateStyles() {
-        const pVal = parseInt(playful.value);
-        const mVal = parseInt(minimal.value);
-        const base = color.value;
-
-        // 1. Playfulness: Affects ease, font-weight, and BOLDNESS (border scale)
-        const pMap = [
-            { bounce: 'ease', weight: '300', extraStroke: 0 },
-            { bounce: 'cubic-bezier(0.4, 0, 0.2, 1)', weight: '400', extraStroke: 1 },
-            { bounce: 'cubic-bezier(0.34, 1.56, 0.64, 1)', weight: '600', extraStroke: 3 },
-            { bounce: 'cubic-bezier(0.68, -0.6, 0.32, 1.6)', weight: '800', extraStroke: 6 }
-        ];
-        const p = pMap[pVal - 1];
-
-        // 2. Minimalism vs Playfulness Border Logic
-        // We multiply minimalism level by a base, then add playfulness "boldness"
-        const finalBorder = mVal === 1 ? 0 : (mVal * 1) + p.extraStroke;
-        const finalShadow = mVal === 1 ? 0 : (mVal * 6);
-
-        mockSite.style.setProperty('--bounce', p.bounce);
-        mockSite.style.setProperty('--weight', p.weight);
-        mockSite.style.setProperty('--brand', base);
-        // Contrast color for borders: gets darker/heavier as playfulness increases
-        mockSite.style.setProperty('--brand-contrast', pVal > 2 ? '#000' : base);
-
-        mockSite.style.setProperty('--border-w', finalBorder + 'px');
-        mockSite.style.setProperty('--shadow-val', finalShadow + 'px');
-
-        // Background tint
-        mockSite.style.setProperty('--bg-site', mVal < 2 ? '#fff' : '#fafafa');
-
-        // 3. Viewport Toggle
-        if (viewMobile.checked) {
-            viewport.classList.add('mobile-view');
-        } else {
-            viewport.classList.remove('mobile-view');
-        }
-    }
-
-    [playful, color, minimal, viewDesktop, viewMobile].forEach(input => {
-        input.addEventListener('input', updateStyles);
-    });
-
-    updateStyles();
-</script>
-    <section class="matrix-container" style="position: relative; overflow: hidden;">
-    <div class="container-fluid">
-        <h2 class="display-4 mb-5 px-md-5">Contact Me</h2>
-        <div class="row g-5 flex-grow-1">
-            <div class="col-md-8">
-                <div class="container h-50 mt-5">
-                    <div class="row h-100">
-                        <div class="col contact-bubble d-flex flex-column align-items-center justify-content-center text-center p-3" style="transform:translateY(50px)">
-                            <i class="bi bi-instagram fs-1 mb-3"></i>
-                            <h4 class="fw-bold">Instagram</h4>
-                            <p class="small mb-3">@ugniuskrp</p>
-                            <a href="https://www.instagram.com/ugniuskrp/" target="_blank" class="btn btn-sm btn-custom mt-auto">Follow</a>
-                        </div>
-
-                        <div class="col contact-bubble d-flex flex-column align-items-center justify-content-center text-center p-3" style="transform:translateY(150px)">
-                            <i class="bi bi-linkedin fs-1 mb-3"></i>
-                            <h4 class="fw-bold">LinkedIn</h4>
-                            <p class="small mb-3">Professional Bio</p>
-                            <a href="https://linkedin.com" target="_blank" class="btn btn-sm btn-custom mt-auto">Connect</a>
-                        </div>
-
-                        <div class="col contact-bubble d-flex flex-column align-items-center justify-content-center text-center p-3" style="transform:translateY(50px)">
-                            <i class="bi bi-facebook fs-1 mb-3"></i>
-                            <h4 class="fw-bold">Facebook</h4>
-                            <p class="small mb-3">Ugnius K</p>
-                            <a href="https://www.facebook.com/" target="_blank" class="btn btn-sm btn-custom mt-auto">Add Friend</a>
+    <!-- Contact Section -->
+    <section class="matrix-container">
+        <div class="container-fluid">
+            <h2 class="display-4 mb-5 px-md-5">Contact Me</h2>
+            <div class="row g-5 flex-grow-1">
+                <div class="col-md-8">
+                    <div class="container h-50 mt-5">
+                        <div class="row h-100">
+                            <div class="col contact-bubble d-flex flex-column align-items-center justify-content-center text-center p-3" style="transform:translateY(50px)">
+                                <i class="bi bi-instagram fs-1 mb-3"></i>
+                                <h4 class="fw-bold">Instagram</h4>
+                                <p class="small mb-3">@ugniuskrp</p>
+                                <a href="https://www.instagram.com/ugniuskrp/" target="_blank" class="btn btn-sm btn-custom mt-auto">Follow</a>
+                            </div>
+                            <div class="col contact-bubble d-flex flex-column align-items-center justify-content-center text-center p-3" style="transform:translateY(150px)">
+                                <i class="bi bi-linkedin fs-1 mb-3"></i>
+                                <h4 class="fw-bold">LinkedIn</h4>
+                                <p class="small mb-3">Professional Bio</p>
+                                <a href="https://linkedin.com" target="_blank" class="btn btn-sm btn-custom mt-auto">Connect</a>
+                            </div>
+                            <div class="col contact-bubble d-flex flex-column align-items-center justify-content-center text-center p-3" style="transform:translateY(50px)">
+                                <i class="bi bi-facebook fs-1 mb-3"></i>
+                                <h4 class="fw-bold">Facebook</h4>
+                                <p class="small mb-3">Ugnius K</p>
+                                <a href="https://www.facebook.com/" target="_blank" class="btn btn-sm btn-custom mt-auto">Add Friend</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="panel hoverable h-100 d-flex flex-column">
-                    <h2 class="mb-4">Email & More</h2>
-                    <p>I'm always open to hear about your project ideas, and build your vision together. Reach out to me!</p>
-
-                    <div class="mt-4">
-                        <div class="mb-4">
-                            <label class="small text-uppercase opacity-50 d-block mb-1">Direct Mail</label>
-                            <a href="mailto:katoastdev@gmail.com" class="text-white text-decoration-none fs-5 fw-bold">katoastdev@gmail.com</a>
+                <div class="col-md-4">
+                    <div class="panel hoverable h-100 d-flex flex-column">
+                        <h2 class="mb-4">Email & More</h2>
+                        <p>I'm always open to hear about your project ideas, and build your vision together. Reach out to me!</p>
+                        <div class="mt-4">
+                            <div class="mb-4">
+                                <label class="small text-uppercase opacity-50 d-block mb-1">Direct Mail</label>
+                                <a href="mailto:katoastdev@gmail.com" class="text-white text-decoration-none fs-5 fw-bold">katoastdev@gmail.com</a>
+                            </div>
+                            <div class="mb-5">
+                                <label class="small text-uppercase opacity-50 d-block mb-1">My local time right now</label>
+                                <div class="d-flex align-items-center">
+                                    <span id="local-time" class="fs-4 fw-bold me-2">--:--:--</span>
+                                    <span class="badge bg-white text-dark rounded-pill">GMT+2</span>
+                                </div>
+                            </div>
                         </div>
-
-                        <div class="mb-5">
-    <label class="small text-uppercase opacity-50 d-block mb-1">My local time right now</label>
-    <div class="d-flex align-items-center">
-        <span id="local-time" class="fs-4 fw-bold me-2">--:--:--</span>
-        <span class="badge bg-white text-dark rounded-pill">GMT+2</span> </div>
-</div>
-                    </div>
-
-                    <div class="mt-auto">
-                        <a href="mailto:katoastdev@gmail.com" class="btn btn-custom w-100 py-3 mb-3">
-                            <i class="bi bi-envelope-fill me-2"></i> Send a letter
-                        </a>
-                        <button class="btn btn-outline-light w-100 border-0 opacity-75" onclick="window.print()">
-                            <i class="bi bi-download me-2"></i> Download CV
-                        </button>
+                        <div class="mt-auto">
+                            <a href="mailto:katoastdev@gmail.com" class="btn btn-custom w-100 py-3 mb-3"><i class="bi bi-envelope-fill me-2"></i> Send a letter</a>
+                            <button class="btn btn-outline-light w-100 border-0 opacity-75" onclick="window.print()"><i class="bi bi-download me-2"></i> Download CV</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+        <canvas id="matrixCanvas"></canvas>
+    </section>
 
-<canvas id="matrixCanvas"></canvas>
-
-</section>
-
+    <!-- Modal -->
     <div id="projectModal" class="modal-overlay">
         <div class="modal-content-wrapper">
             <span class="close-btn" onclick="closeModal()">&times;</span>
@@ -442,81 +361,184 @@
     </div>
 
     <script>
+        // --- 1. DESIGN SYSTEM CONTROLS ---
+        const mockSite = document.getElementById('mockSite');
+        const viewport = document.getElementById('viewportContainer');
+        const playful = document.getElementById('playfulness');
+        const color = document.getElementById('baseColor');
+        const minimal = document.getElementById('minimalism');
+        const viewDesktop = document.getElementById('viewDesktop');
+        const viewMobile = document.getElementById('viewMobile');
 
+        function updateStyles() {
+            const pVal = parseInt(playful.value);
+            const mVal = parseInt(minimal.value);
+            const base = color.value;
+            const pMap = [
+                { bounce: 'ease', weight: '300', extraStroke: 0 },
+                { bounce: 'cubic-bezier(0.4, 0, 0.2, 1)', weight: '400', extraStroke: 1 },
+                { bounce: 'cubic-bezier(0.34, 1.56, 0.64, 1)', weight: '600', extraStroke: 3 },
+                { bounce: 'cubic-bezier(0.68, -0.6, 0.32, 1.6)', weight: '800', extraStroke: 6 }
+            ];
+            const p = pMap[pVal - 1];
+            const finalBorder = mVal === 1 ? 0 : (mVal * 1) + p.extraStroke;
+            const finalShadow = mVal === 1 ? 0 : (mVal * 6);
+
+            mockSite.style.setProperty('--bounce', p.bounce);
+            mockSite.style.setProperty('--weight', p.weight);
+            mockSite.style.setProperty('--brand', base);
+            mockSite.style.setProperty('--brand-contrast', pVal > 2 ? '#000' : base);
+            mockSite.style.setProperty('--border-w', finalBorder + 'px');
+            mockSite.style.setProperty('--shadow-val', finalShadow + 'px');
+            mockSite.style.setProperty('--bg-site', mVal < 2 ? '#fff' : '#fafafa');
+
+            if (viewMobile.checked) {
+                viewport.classList.add('mobile-view');
+            } else {
+                viewport.classList.remove('mobile-view');
+            }
+        }
+
+        [playful, color, minimal, viewDesktop, viewMobile].forEach(input => {
+            input.addEventListener('input', updateStyles);
+        });
+        updateStyles();
+
+        // --- 2. NEURAL CHART LOGIC ---
+        const principleData = [
+            { l: 'C#', v: 55, c: '#00d4ff', d: 'The basis on which I learned to develop video games and do university projects.' },
+            { l: 'Java', v: 20, c: '#0077ff', d: 'Not unlike C#, I have experience creating fast and multithreaded, OS-Agnostic workflows.' },
+            { l: 'HTML+CSS', v: 25, c: '#b388ff', d: 'I\'ve made many websites, as well as worked with asp.net webapps.' }
+        ];
+
+        const chartMatrix = document.getElementById('matrix-overlay');
+        const cmx = chartMatrix.getContext('2d');
+        chartMatrix.width = chartMatrix.height = 600;
+        let chartP = Array.from({length: 45}, () => Math.random() * 600);
+
+        function drawChartMatrix() {
+            cmx.clearRect(0,0,600,600); cmx.fillStyle = '#fff'; cmx.font = '14px monospace';
+            chartP.forEach((v, i) => {
+                cmx.fillText(Math.random() > .5 ? '1' : '0', v, i * 14);
+                chartP[i] = v > 600 ? -14 : v + 1;
+            });
+            requestAnimationFrame(drawChartMatrix);
+        }
+        drawChartMatrix();
+
+        const rad = 220, circum = 2 * Math.PI * rad;
+        const sG = document.getElementById('seg'), cG = document.getElementById('con');
+        const lbl = document.getElementById('lbl'), val = document.getElementById('val'), det = document.getElementById('det');
+        let chartAcc = 0;
+
+        principleData.forEach(i => {
+    const ang = (chartAcc + i.v / 2) / 100 * 2 * Math.PI;
+    const tx = 300 + rad * Math.cos(ang), ty = 300 + rad * Math.sin(ang);
+    
+    // Create Connector Line
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', 300); line.setAttribute('y1', 300); 
+    line.setAttribute('x2', tx); line.setAttribute('y2', ty);
+    line.setAttribute('stroke', 'rgba(255,255,255,0.1)');
+    line.setAttribute('stroke-width', '1');
+    cG.appendChild(line);
+
+    // Create Segment
+    const circ = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circ.setAttribute('cx', 300); circ.setAttribute('cy', 300); circ.setAttribute('r', rad);
+    circ.setAttribute('class', 'segment');
+    circ.setAttribute('stroke', i.c);
+    circ.setAttribute('stroke-dasharray', `${(i.v/100)*circum} ${circum}`);
+    circ.setAttribute('stroke-dashoffset', -(chartAcc/100)*circum);
+
+    // HOVER LOGIC FIX
+    circ.onmouseenter = () => {
+        lbl.innerText = i.l; 
+        val.innerText = i.v + '%'; // CHANGED: Now shows the actual percentage
+        det.innerText = i.d; 
+        val.style.color = i.c;
+        line.setAttribute('stroke-width', '3');
+        line.setAttribute('stroke', i.c);
+    };
+
+    circ.onmouseleave = () => {
+        lbl.innerText = 'Languages I know'; 
+        val.innerText = 'Experience'; 
+        det.innerText = 'Hover elements to inspect'; 
+        val.style.color = '#fff';
+        line.setAttribute('stroke-width', '1');
+        line.setAttribute('stroke', 'rgba(255,255,255,0.1)');
+    };
+
+    sG.appendChild(circ);
+    chartAcc += i.v;
+});
+
+// --- 5. SMART SCROLL OBSERVER ---
+const introSection = document.getElementById('intro');
+const scrollArrow = document.getElementById('scroll-indicator');
+
+const observerOptions = {
+    root: null, // use the viewport
+    threshold: 0.9 // Trigger when only 90% of the section is visible
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (!entry.isIntersecting) {
+            scrollArrow.classList.add('hidden');
+        } else {
+            scrollArrow.classList.remove('hidden');
+        }
+    });
+}, observerOptions);
+
+observer.observe(introSection);
+
+        // --- 3. CONTACT MATRIX & TIME ---
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Set canvas size
         function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight * 0.4; // Match the CSS height
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight * 0.4;
         }
-
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
         const fontSize = 16;
-        const columns = Math.ceil(canvas.width / fontSize);
         const rows = Math.ceil(canvas.height / fontSize);
+        const xPositions = Array(rows).fill(0).map(() => Math.random() * canvas.width);
 
-        // Array to track the horizontal position of each row
-        const xPositions = Array(rows).fill(0);
-        // Randomize starting positions so they don't all start at once
-        xPositions.forEach((_, i) => xPositions[i] = Math.random() * canvas.width);
-
-        function draw() {
-        // Clear the canvas every frame
-        ctx.fillStyle = 'rgba(0, 0, 0, 1)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = '#FFFFFF'; // Matrix Green - change to #fff if you want white
-        ctx.font = fontSize + 'px monospace';
-
-        for (let i = 0; i < xPositions.length; i++) {
-            // Randomly pick 0 or 1
-            const text = Math.floor(Math.random() * 2);
-            const y = i * fontSize;
-            const x = xPositions[i];
-
-            ctx.fillText(text, x, y);
-
-            // Move the text to the right
-            // We use a slight random variation so rows move at different speeds
-            xPositions[i] += 2 + Math.random() * 2;
-
-            // Reset to left side if it goes off screen
-            if (xPositions[i] > canvas.width) {
-                xPositions[i] = -fontSize;
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = fontSize + 'px monospace';
+            for (let i = 0; i < xPositions.length; i++) {
+                const text = Math.floor(Math.random() * 2);
+                ctx.fillText(text, xPositions[i], i * fontSize);
+                xPositions[i] += 2 + Math.random() * 2;
+                if (xPositions[i] > canvas.width) xPositions[i] = -fontSize;
             }
         }
-        }
-
-        // Control the frame rate
-        setInterval(draw, 50);
+        setInterval(drawMatrix, 50);
 
         function updateTime() {
-        const timeDisplay = document.getElementById('local-time');
-        const now = new Date();
+            const timeDisplay = document.getElementById('local-time');
+            const now = new Date();
+            timeDisplay.textContent = now.toLocaleTimeString('en-US', {
+                hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
 
-        // Options to format time. Use 'en-GB' for 24h or 'en-US' for AM/PM
-        const timeString = now.toLocaleTimeString('en-US', {
-            hour12: true,
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-
-        timeDisplay.textContent = timeString;
-    }
-
-    // Update every second
-    setInterval(updateTime, 1000);
-    updateTime(); // Initial call
-
+        // --- 4. MODALS ---
         const projectData = {
-            'ToastCut': 'Detailed insights into ToastCut: This project streamlines component-based workflows for enterprise design systems.',
-            'RaceTracksSystem': 'Technical breakdown of RaceTracksSystem: Optimized for high-frequency data processing and visual tracking.',
-            'Fortress Challenge': 'Overview of Fortress Challenge: A security-first architecture built for low-latency global distribution.'
+            'ToastCut': 'Detailed insights into ToastCut: This project streamlines component-based workflows for enterprise design systems. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ultricies efficitur nulla eu venenatis. Sed elit elit, elementum nec fringilla vel, aliquet eu nulla. Phasellus at sapien libero. Phasellus ut nibh non odio pharetra finibus. Duis ullamcorper porta magna. Aenean ullamcorper interdum enim non iaculis. Donec posuere sit amet dolor eu tempus. Quisque laoreet vestibulum libero, sit amet commodo massa pretium vel. Cras sodales eros eget est scelerisque pharetra. ',
+            'RaceTracksSystem': 'Technical breakdown of RaceTracksSystem: Optimized for high-frequency data processing and visual tracking. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ultricies efficitur nulla eu venenatis. Sed elit elit, elementum nec fringilla vel, aliquet eu nulla. Phasellus at sapien libero. Phasellus ut nibh non odio pharetra finibus. Duis ullamcorper porta magna. Aenean ullamcorper interdum enim non iaculis. Donec posuere sit amet dolor eu tempus. Quisque laoreet vestibulum libero, sit amet commodo massa pretium vel. Cras sodales eros eget est scelerisque pharetra. ',
+            'Fortress Challenge': 'Overview of Fortress Challenge: A security-first architecture built for low-latency global distribution. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ultricies efficitur nulla eu venenatis. Sed elit elit, elementum nec fringilla vel, aliquet eu nulla. Phasellus at sapien libero. Phasellus ut nibh non odio pharetra finibus. Duis ullamcorper porta magna. Aenean ullamcorper interdum enim non iaculis. Donec posuere sit amet dolor eu tempus. Quisque laoreet vestibulum libero, sit amet commodo massa pretium vel. Cras sodales eros eget est scelerisque pharetra. '
         };
 
         function openModal(name) {
@@ -532,6 +554,7 @@
         }
 
         window.onclick = (e) => { if (e.target.id === 'projectModal') closeModal(); }
+
 
     </script>
 </body>
