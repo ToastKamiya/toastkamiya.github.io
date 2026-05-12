@@ -25,11 +25,50 @@
             background: linear-gradient(to right, black, #242424, #242424, black);
             color: var(--text-color); scroll-snap-type: y mandatory; overflow-y: scroll;
         }
-
+        /*
         section {
             height: 100vh; width: 100%; scroll-snap-align: start; scroll-snap-stop: always;
             display: flex; align-items: center; justify-content: center; padding: 60px 40px;
+        }*/
+
+        /* New style */
+        section {
+            min-height: 100vh; /* Use min-height instead of fixed height */
+            width: 100%; scroll-snap-align: start; scroll-snap-stop: always;
+            display: flex; align-items: center; justify-content: center; padding: 60px 40px;
         }
+
+/* --- Project Section Specific Adjustments --- */
+#projects-section {
+    /* Ensure the section itself is still scrollable and snaps correctly */
+    min-height: 100vh;
+}
+
+#projects-section .container-fluid {
+    /* Allow the container to grow vertically if needed, but keep its internal structure clean */
+    display: block !important; /* Override flex behavior on the main container for this section */
+}
+
+#projects-section .row {
+    /* Ensure Bootstrap grid columns behave as expected (3 columns on medium screens and up) */
+    flex-wrap: wrap;
+    align-items: stretch; /* Important: Makes sure all cards stretch to the same height if needed */
+}
+
+.col-md-4 {
+    /* Explicitly define width behavior for desktop view */
+    width: 100%; /* Default mobile width */
+    padding-right: var(--bs-gutter-x, 1.5rem);
+    padding-left: var(--bs-gutter-x, 1.5rem);
+}
+
+@media (min-width: 768px) { /* Bootstrap 'md' breakpoint */
+    .col-md-4 {
+        /* Set the correct width for desktop view */
+        flex: 0 0 auto;
+        width: 33.33333%;
+    }
+}
 
         .scroll-indicator {
             position: fixed;
@@ -58,7 +97,7 @@
             animation: bobbing 2s infinite ease-in-out;
         }
 
-        .container-fluid { max-width: 1200px; height: 100%; display: flex; flex-direction: column; }
+        .container-fluid { max-width: 1200px; height: 90vh; display: flex; flex-direction: column; }
 
         /* --- Reusable Components --- */
         .panel, .interactive-panel, .modal-content-wrapper { border-radius: var(--br-lg); padding: 2rem; }
@@ -120,6 +159,21 @@
         .screenshot:hover .folder-title span {
             opacity: 1;
             transform: translateY(0);
+        }
+
+        /* Styles for the new icon container */
+        .tech-icons {
+            display: flex; /* Use flexbox to align icons horizontally */
+            align-items: center; /* Vertically center them if they have different heights */
+            flex-wrap: wrap; /* Allows wrapping if you add too many icons */
+            gap: 10px; /* Space between the icons */
+        }
+
+        .tech-icons img {
+            /* Set a consistent size for all logos */
+            width: 45px;
+            height: 45px;
+            object-fit: contain; /* Ensures the image scales nicely within the box */
         }
 
         .interactive-panel { background: black; box-shadow: 0 10px 30px black; outline: 5px solid white; }
@@ -208,6 +262,26 @@
         h2 { font-weight: 700; }
         p { opacity: 0.8; }
 
+        /* --- Section Numbering System --- */
+        .section-number {
+            position: fixed;
+            right: -150px; /* Place it off-canvas to the right */
+            top: 50%;
+            transform: translateY(-50%);
+            transition: opacity 0.4s ease;
+            opacity: 0;
+            font-size: 40rem;
+            font-weight: 900;
+            line-height: 1;
+            color: rgba(255, 255, 255, 0.1); /* Very subtle white */
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Fade logic using Intersection Observer class */
+        .fade-in { opacity: 1 !important; }
+        .fade-out { opacity: 0 !important; }
+
         .preview-card:hover {
             transform: translate(-4px, -4px);
             box-shadow: calc(var(--shadow-val) + 8px) calc(var(--shadow-val) + 8px) 0px var(--brand-contrast) !important;
@@ -231,7 +305,7 @@
                 </h2>
                 <div class="profile-img" title="This logo is a placeholder."><br></div>
             </div>
-            <div class="screenshot-stack">
+            <div class="screenshot-stack" style="z-index: 3;">
                 <!-- Project 1 -->
                 <div onclick="location.href='https://github.com/ToastKamiya/toastcut/';" class="screenshot s1">
                     <div class="panel folder-title">
@@ -254,6 +328,7 @@
                     </div>
                 </div>
             </div>
+            <div id="num-0" class="section-number">1</div>
         </div>
 
         <!-- Scroll Indicator -->
@@ -263,38 +338,71 @@
         </div>
     </section>
 
-    <!-- Projects Section -->
-    <section>
-        <div class="container-fluid">
-            <h2 class="display-4 mb-5">My Projects</h2>
-            <div class="row g-4 flex-grow-1">
-                <div class="col-md-4">
-                    <div class="panel hoverable h-100 d-flex flex-column">
-                        <h2>ToastCut</h2>
-                        <div class="img-placeholder" style="background-image: url('https://raw.githubusercontent.com/ToastKamiya/toastcut/main/assets/screenshot.png')"></div>
-                        <p class="flex-grow-1">Electron-based video editing suite using FFmpeg. Ported from a complex batch script to a cross-platform app.</p>
-                        <button class="btn btn-custom" onclick="openModal('ToastCut')">Learn More</button>
+<!-- Projects Section -->
+<section>
+    <div class="container-fluid">
+        <h2 class="display-4 mb-5">My Projects</h2>
+        <div class="row g-4 flex-grow-1 z-3">
+
+            <!-- Project 1: ToastCut -->
+            <div class="col-md-4">
+                <div class="panel hoverable h-100 d-flex flex-column">
+                    <h2>ToastCut</h2>
+                    <div class="img-placeholder" style="background-image: url('https://raw.githubusercontent.com/ToastKamiya/toastcut/main/assets/screenshot.png')"></div>
+
+                    <!-- NEW ICON CONTAINER ADDED HERE -->
+                    <div class="tech-icons mb-2">
+                        <!-- Example Icons (Replace these with your actual image paths) -->
+                        <img src="https://abrudz.github.io/logos/JS.svg" alt="Javascript" style="width: 40px; height: 40px; margin-right: 5px;">
+                        <img src="https://www.electronjs.org/assets/img/logo.svg" alt="Electron" style="width: 40px; height: 40px;">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/FFmpeg_icon.svg/1280px-FFmpeg_icon.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail" alt="FFmpeg" style="width: 40px; height: 40px;">
                     </div>
+
+                    <p class="flex-grow-1">Electron-based video editing suite using FFmpeg. Ported from a complex batch script to a cross-platform app.</p>
+                    <button class="btn btn-custom" onclick="openModal('ToastCut')">Learn More</button>
                 </div>
-                <div class="col-md-4">
-                    <div class="panel hoverable h-100 d-flex flex-column">
-                        <h2>RaceTracks</h2>
-                        <div class="img-placeholder" style="background-image:  url('https://prawnhub.org/files/s3project.png')"></div>
-                        <p class="flex-grow-1">University group project focused on UI, programming simplicity, and user permission compatibility.</p>
-                        <button class="btn btn-custom" onclick="openModal('RaceTracksSystem')">Learn More</button>
+            </div>
+
+            <!-- Project 2: RaceTracks -->
+            <div class="col-md-4">
+                <div class="panel hoverable h-100 d-flex flex-column">
+                    <h2>RaceTracks</h2>
+                    <div class="img-placeholder" style="background-image:  url('https://prawnhub.org/files/s3project.png')"></div>
+
+                    <!-- NEW ICON CONTAINER ADDED HERE -->
+                    <div class="tech-icons mb-2">
+                        <!-- Example Icons (Replace these with your actual image paths) -->
+                        <img src="https://abrudz.github.io/logos/PHP.svg" alt="PHP" style="width: 40px; height: 40px; margin-right: 5px;">
+                        <img src="https://abrudz.github.io/logos/JS.svg" alt="Javascript" style="width: 40px; height: 40px;">
                     </div>
+
+                    <p class="flex-grow-1">University group project focused on UI, programming simplicity, and user permission compatibility.</p>
+                    <button class="btn btn-custom" onclick="openModal('RaceTracksSystem')">Learn More</button>
                 </div>
-                <div class="col-md-4">
-                    <div class="panel hoverable h-100 d-flex flex-column">
-                        <h2>Fortress Challenge</h2>
-                        <div class="img-placeholder" style="background-image: url('https://prawnhub.org/files/Android_10.png')"></div>
-                        <p class="flex-grow-1">Mobile app developed with "4Health" team focusing on responsive UI and smooth user experience.</p>
-                        <button class="btn btn-custom" onclick="openModal('Fortress Challenge')">Learn More</button>
+            </div>
+
+            <!-- Project 3: Fortress Challenge -->
+            <div class="col-md-4">
+                <div class="panel hoverable h-100 d-flex flex-column">
+                    <h2>Fortress Challenge</h2>
+                    <div class="img-placeholder" style="background-image: url('https://prawnhub.org/files/Android_10.png')"></div>
+
+                    <!-- NEW ICON CONTAINER ADDED HERE -->
+                    <div class="tech-icons mb-2">
+                        <!-- Example Icons (Replace these with your actual image paths) -->
+                        <img src="https://images.seeklogo.com/logo-png/36/1/c-sharp-c-logo-png_seeklogo-363285.png" alt="C Sharp" style="width: 40px; height: 40px; margin-right: 5px;">
+                        <img src="https://developer.android.com/static/images/brand/android-head_flat.svg" alt="Android" style="width: 40px; height: 40px;">
                     </div>
+
+                    <p class="flex-grow-1">Mobile app developed with "4Health" team focusing on responsive UI and smooth user experience.</p>
+                    <button class="btn btn-custom" onclick="openModal('Fortress Challenge')">Learn More</button>
                 </div>
             </div>
         </div>
-    </section>
+        <div id="num-1" class="section-number">2</div>
+    </div>
+</section>
+
 
     <!-- Principles Section (Integrated Neural Chart) -->
     <section>
@@ -321,6 +429,7 @@
                     </svg>
                 </div>
             </div>
+            <div id="num-2" class="section-number">3</div>
         </div>
     </section>
 
@@ -328,7 +437,7 @@
     <section>
         <div class="container-fluid">
             <h2 class="display-4 mb-4 px-md-5 text-white">Explore my design</h2>
-            <div class="row g-5 flex-grow-1 align-items-stretch">
+            <div class="row g-5 flex-grow-1 align-items-stretch z-3">
                 <div class="col-md-4">
                     <div class="panel static h-100 d-flex flex-column gap-4">
                         <div>
@@ -383,6 +492,7 @@
                     </div>
                 </div>
             </div>
+            <div id="num-3" class="section-number">4</div>
         </div>
     </section>
 
@@ -390,7 +500,7 @@
     <section class="matrix-container">
         <div class="container-fluid">
             <h2 class="display-4 mb-5 px-md-5">Contact Me</h2>
-            <div class="row g-5 flex-grow-1">
+            <div class="row g-5 flex-grow- z-3">
                 <div class="col-md-8">
                     <div class="container h-50 mt-5">
                         <div class="row h-100">
@@ -439,6 +549,7 @@
                     </div>
                 </div>
             </div>
+            <div id="num-4" class="section-number">5</div>
         </div>
         <canvas id="matrixCanvas"></canvas>
     </section>
@@ -530,10 +641,10 @@
         principleData.forEach(i => {
     const ang = (chartAcc + i.v / 2) / 100 * 2 * Math.PI;
     const tx = 300 + rad * Math.cos(ang), ty = 300 + rad * Math.sin(ang);
-    
+
     // Create Connector Line
     const line = document.createElementNS('http://www.w3.org/2000/svg','line');
-    line.setAttribute('x1', 300); line.setAttribute('y1', 300); 
+    line.setAttribute('x1', 300); line.setAttribute('y1', 300);
     line.setAttribute('x2', tx); line.setAttribute('y2', ty);
     line.setAttribute('stroke', 'rgba(255,255,255,0.1)');
     line.setAttribute('stroke-width', '1');
@@ -549,18 +660,18 @@
 
     // HOVER LOGIC FIX
     circ.onmouseenter = () => {
-        lbl.innerText = i.l; 
+        lbl.innerText = i.l;
         val.innerText = i.v + '%'; // CHANGED: Now shows the actual percentage
-        det.innerText = i.d; 
+        det.innerText = i.d;
         val.style.color = i.c;
         line.setAttribute('stroke-width', '3');
         line.setAttribute('stroke', i.c);
     };
 
     circ.onmouseleave = () => {
-        lbl.innerText = 'Languages I know'; 
-        val.innerText = 'Experience'; 
-        det.innerText = 'Hover elements to inspect'; 
+        lbl.innerText = 'Languages I know';
+        val.innerText = 'Experience';
+        det.innerText = 'Hover elements to inspect';
         val.style.color = '#fff';
         line.setAttribute('stroke-width', '1');
         line.setAttribute('stroke', 'rgba(255,255,255,0.1)');
@@ -650,6 +761,37 @@ observer.observe(introSection);
         }
 
         window.onclick = (e) => { if (e.target.id === 'projectModal') closeModal(); }
+
+        // --- 6. SECTION NUMBERING VISIBILITY ---
+        const numberObserverOptions = {
+            root: null,
+            // threshold: 0.5 means the logic triggers when 50% of the section is visible
+            threshold: 0.5
+        };
+
+        const numberObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                // Find the number div inside this specific section
+                const numberDiv = entry.target.querySelector('.section-number');
+
+                if (numberDiv) {
+                    if (entry.isIntersecting) {
+                        // Section is active: Fade it in
+                        numberDiv.classList.add('fade-in');
+                        numberDiv.classList.remove('fade-out');
+                    } else {
+                        // Section is gone: Fade it out
+                        numberDiv.classList.add('fade-out');
+                        numberDiv.classList.remove('fade-in');
+                    }
+                }
+            });
+        }, numberObserverOptions);
+
+        // Apply the observer to every section tag on your page
+        document.querySelectorAll('section').forEach(section => {
+            numberObserver.observe(section);
+        });
 
 
     </script>
