@@ -21,11 +21,16 @@
             --shadow-standard: 0 10px 30px rgba(53, 86, 204, 0.4);
         }
 
+        *{
+            text-size-adjust: 100% !important;
+        }
+
         /* --- Base & Layout --- */
         body, html {
             margin: 0; padding: 0; font-family: 'Manrope', sans-serif; height: 100vh;
             background: linear-gradient(to right, black, #242424, #242424, black);
             color: var(--text-color); scroll-snap-type: y mandatory; overflow-y: scroll;
+            font-size: 1vw;
         }
         /*
         section {
@@ -99,7 +104,7 @@
             animation: bobbing 2s infinite ease-in-out;
         }
 
-        .container-fluid { max-width: 1200px; height: 90vh; display: flex; flex-direction: column; }
+        .container-fluid { max-width: 80vw; height: 90vh; display: flex; flex-direction: column; }
 
         /* --- Reusable Components --- */
         .panel, .interactive-panel, .modal-content-wrapper { border-radius: var(--br-lg); padding: 2rem; }
@@ -179,7 +184,7 @@
         }
 
         .interactive-panel { background: black; box-shadow: 0 10px 30px black; outline: 5px solid white; }
-        .profile-img { background-size: cover; width: 160px; height: 160px; color: black; background-image: url("https://prawnhub.org/files/logomine2.png")}
+        .profile-img { background-size: cover; width: 12em; height: 12em; color: black; background-image: url("https://prawnhub.org/files/logomine2.png")}
 
         /* --- Screenshot Animations --- */
         @keyframes flyIn {
@@ -195,10 +200,10 @@
             }
         }
 
-        .screenshot-stack { position: relative; height: 300px; margin-top: 15vh; perspective: 1200px; }
+        .screenshot-stack { position: relative; height: 350px; margin-top: 15vh; perspective: 1200px; }
 
         .screenshot {
-            position: absolute; width: 50%; aspect-ratio: 16/9; border-radius: 12px;
+            position: absolute; width: 48%; aspect-ratio: 16/9; border-radius: 12px;
             border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.5);
             transform-style: preserve-3d; background-size: cover; background-repeat: no-repeat;
             opacity: 0;
@@ -209,19 +214,55 @@
             --final-rotate: -5deg;
             cursor:pointer; left: -15%; top: 5%; z-index: 11;
             background-image: url("https://github.com/ToastKamiya/toastcut/raw/main/assets/screenshot.png");
-            animation-delay: 0.2s;
+            animation-delay: 0.4s;
         }
         .s2 {
             --final-rotate: 2deg;
             left: 28%; top: 20px; z-index: 12;
             background-image: url("https://prawnhub.org/files/s3project.png");
-            animation-delay: 0.4s;
+            animation-delay: 0.8s;
         }
         .s3 {
             --final-rotate: -2deg;
             left: 68%; top: 40px; z-index: 13;
             background-image: url("https://prawnhub.org/files/s2project.png");
-            animation-delay: 0.6s;
+            animation-delay: 1.2s;
+        }
+
+        /* The slider itself */
+        .custom-range-form {
+          -webkit-appearance: none;  /* Override default CSS styles */
+          appearance: none;
+          width: 100%; /* Full-width */
+          height: 25px; /* Specified height */
+          background: #fff; /* WHITE background */
+          outline: none; /* Remove outline */
+          opacity: 1; /* Set transparency (for mouse-over effects on hover) */
+          -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+          transition: opacity .2s;
+          border-radius:6px;
+        }
+
+        /* Mouse-over effects */
+        .custom-range-form:hover {
+          
+        }
+
+        /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+        .custom-range-form::-webkit-slider-thumb {
+          -webkit-appearance: none; /* Override default look */
+          appearance: none; 
+          width: 25px; /* Set a specific slider handle width */
+          height: 25px; /* Slider handle height */
+          background: var(--panel-gradient); /* Green background */
+          cursor: pointer; /* Cursor on hover */
+        }
+
+        .custom-range-form::-moz-range-thumb {
+          width: 25px; /* Set a specific slider handle width */
+          height: 25px; /* Slider handle height */
+          background: var(--panel-gradient); /* Green background */
+          cursor: pointer; /* Cursor on hover */
         }
 
         .img-placeholder {
@@ -278,6 +319,15 @@
             color: rgba(255, 255, 255, 0.1); /* Very subtle white */
             z-index: 0;
             pointer-events: none;
+
+        }
+
+        .intro-screen{
+            max-width:65vw !important;
+        }
+
+        .interact-label{
+            font-size:2rem;
         }
 
         /* Fade logic using Intersection Observer class */
@@ -295,12 +345,20 @@
             border: 12px solid #1a1a1a !important;
             border-radius: 40px !important;
         }
+
+        .bi-arrow-up-short{
+            animation: glow-throb 2s infinite;
+        }
+
+        @keyframes glow-throb {
+            0%{ text-shadow:none; opacity:0.6; } 50%{ text-shadow:white 0px 0 10px; opacity:1;  } 100%{ text-shadow:none;opacity:0.6;  }
+        }
     </style>
 </head>
 <body>
     <!-- Intro Section -->
     <section id="intro">
-        <div class="container-fluid">
+        <div class="container-fluid intro-screen">
             <div class="d-flex justify-content-between align-items-center w-100">
                 <h2 class="m-0" style="font-size: 5rem; font-weight:100;">I am<br>
                 <a style="font-weight:500">Ugnius K.</a>
@@ -443,21 +501,21 @@
                 <div class="col-md-4">
                     <div class="panel static h-100 d-flex flex-column gap-4">
                         <div>
-                            <label class="form-label fw-bold d-flex justify-content-between">Playfulness</label>
-                            <input type="range" class="form-range" id="playfulness" min="1" max="4" step="1" value="2">
+                            <label class="form-label interact-label fw-bold d-flex justify-content-between">Playfulness</label>
+                            <input type="range" class="custom-range-form" id="playfulness" min="1" max="4" step="1" value="2">
                             <div class="d-flex justify-content-between small opacity-50"><span>Muted</span><span>Exaggerated</span></div>
                         </div>
                         <div>
-                            <label class="form-label fw-bold">Brand Identity</label>
+                            <label class="form-label interact-label fw-bold">Brand Identity</label>
                             <input type="color" class="form-control form-control-color w-100" id="baseColor" value="#4C3BCF">
                         </div>
                         <div>
-                            <label class="form-label fw-bold d-flex justify-content-between">Minimalism</label>
-                            <input type="range" class="form-range" id="minimalism" min="1" max="4" step="1" value="3">
+                            <label class="form-label interact-label fw-bold d-flex justify-content-between">Minimalism</label>
+                            <input type="range" class="custom-range-form" id="minimalism" min="1" max="4" step="1" value="3">
                             <div class="d-flex justify-content-between small opacity-50"><span>Sleek</span><span>Extravagant</span></div>
                         </div>
                         <div>
-                            <label class="fw-bold mb-2 d-block">Device View</label>
+                            <label class="fw-bold interact-label mb-2 d-block">Device View</label>
                             <div class="btn-group w-100" role="group">
                                 <input type="radio" class="btn-check" name="viewMode" id="viewDesktop" checked>
                                 <label class="btn btn-outline-light py-2" for="viewDesktop">Desktop</label>
@@ -564,6 +622,7 @@
                 <h2 id="modalTitle" class="display-4"></h2>
                 <hr>
                 <div id="modalText" class="lead"></div>
+                <button class="btn btn-custom" onclick="location.href='https://github.com/ToastKamiya/toastcut/';">Learn More</button>
             </div>
         </div>
     </div>
@@ -614,22 +673,22 @@
 
         // --- 2. NEURAL CHART LOGIC ---
         const principleData = [
-            { l: 'C#', v: 45, c: '#00d4ff', d: 'The basis on which I learned to develop video games and do university projects.' },
-            { l: 'Java', v: 25, c: '#0077ff', d: 'Not unlike C#, I have experience creating fast and multithreaded, OS-Agnostic workflows.' },
-            { l: 'HTML+CSS', v: 20, c: '#b388ff', d: 'I\'ve made many websites, as well as worked with asp.net webapps.' },
-            { l: 'Python', v: 10, c: '#b388aa', d: 'I have hundreds of hours modelling using Blender - nodes, python, and 3D work are my forte.' }
+            { l: 'C#', v: 45, c: '#00d4ff', d: 'The main language using which I learned to develop video games and do university projects.' },
+            { l: 'Java', v: 25, c: '#0077ff', d: 'Like C#, through university projects I have experience creating fast and multithreaded, OS-Agnostic workflows.' },
+            { l: 'HTML+CSS', v: 20, c: '#b388ff', d: 'I\'ve made many websites, using pure HTML as well as some asp.net webapps.' },
+            { l: 'Python', v: 10, c: '#b388aa', d: 'I have written scripts for automating workflows, as well as Blender plugins.' }
         ];
 
         const chartMatrix = document.getElementById('matrix-overlay');
         const cmx = chartMatrix.getContext('2d');
-        chartMatrix.width = chartMatrix.height = 600;
-        let chartP = Array.from({length: 45}, () => Math.random() * 600);
+        chartMatrix.width = chartMatrix.height = 800;
+        let chartP = Array.from({length: 45}, () => Math.random() * 800);
 
         function drawChartMatrix() {
-            cmx.clearRect(0,0,600,600); cmx.fillStyle = '#fff'; cmx.font = '14px monospace';
+            cmx.clearRect(0,0,800,800); cmx.fillStyle = '#fff'; cmx.font = '14px monospace';
             chartP.forEach((v, i) => {
                 cmx.fillText(Math.random() > .5 ? '1' : '0', v, i * 14);
-                chartP[i] = v > 600 ? -14 : v + 1;
+                chartP[i] = v > 800 ? -14 : v + 1;
             });
             requestAnimationFrame(drawChartMatrix);
         }
