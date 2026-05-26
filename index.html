@@ -124,8 +124,8 @@
             position: absolute;
             z-index: -1;
             border-radius: 15px 15px 0 0;
-            height: 40px;
-            top: -40px;
+            height: 2em;
+            top: -2em;
             padding: 0;
             display: flex;
             flex-direction: column;
@@ -144,7 +144,7 @@
         }
 
         .folder-title span {
-            font-size: 14pt;
+            font-size: 1vw;
             font-weight: 800;
             opacity: 0;
             transform: translateY(10px);
@@ -153,8 +153,8 @@
 
         /* Hover Reveal Logic */
         .screenshot:hover .folder-title {
-            height: 85px;
-            top: -85px;
+            height: 4em;
+            top: -4em;
             background: white;
             color: var(--accent-2);
         }
@@ -353,6 +353,40 @@
         @keyframes glow-throb {
             0%{ text-shadow:none; opacity:0.6; } 50%{ text-shadow:white 0px 0 10px; opacity:1;  } 100%{ text-shadow:none;opacity:0.6;  }
         }
+
+        #code-snippet-panel {
+        position: fixed;
+        top: 20%;
+        left: 20px; /* Gap from the left side of the screen */
+        width: 20vw;
+        padding: 15px;
+        z-index: 100;
+        font-family: monospace;
+        transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 1s linear(0.2, 0.4 75%, 1);
+        
+        /* Initial state: Hidden offscreen to the left */
+        transform: translateX(-110%);
+        opacity: 0;
+        pointer-events: none; /* Stops it from blocking clicks while hidden */
+        }
+
+        #code-snippet-panel.active {
+            /* Slide in state */
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        #code-snippet-panel pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        #code-panel-content {
+            font-size: 1.3rem;
+            color: rgba(255,255,255, 0.3);
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -490,6 +524,11 @@
                 </div>
             </div>
             <div id="num-2" class="section-number">3</div>
+        </div>
+        <!-- Code Snippet Slide-in Panel -->
+        <div id="code-snippet-panel" class="code-panel-hidden">
+                <div><span></span><span></span><span></span></div>
+            <pre><code id="code-panel-content"></code></pre>
         </div>
     </section>
 
@@ -673,10 +712,34 @@
 
         // --- 2. NEURAL CHART LOGIC ---
         const principleData = [
-            { l: 'C#', v: 45, c: '#00d4ff', d: 'The main language using which I learned to develop video games and do university projects.' },
-            { l: 'Java', v: 25, c: '#0077ff', d: 'Like C#, through university projects I have experience creating fast and multithreaded, OS-Agnostic workflows.' },
-            { l: 'HTML+CSS', v: 20, c: '#b388ff', d: 'I\'ve made many websites, using pure HTML as well as some asp.net webapps.' },
-            { l: 'Python', v: 10, c: '#b388aa', d: 'I have written scripts for automating workflows, as well as Blender plugins.' }
+            { 
+                l: 'C#', 
+                v: 45, 
+                c: '#00d4ff', 
+                d: 'The main language using which I learned to develop video games and do university projects.',
+                code: `using System;\n\npublic class Program\n{\npublic static void Main(){\n        Console.WriteLine("Hello from C#!");\n    }\n}`
+            },
+            { 
+                l: 'Java', 
+                v: 25, 
+                c: '#0077ff', 
+                d: 'Like C#, through university projects I have experience creating fast and multithreaded, OS-Agnostic workflows.',
+                code: `public class Main {\n    public static void Main(String[] args) {\n        System.out.println("Hello from Java!");\n    }\n}`
+            },
+            { 
+                l: 'HTML+CSS', 
+                v: 20, 
+                c: '#b388ff', 
+                d: "I've made many websites, using pure HTML as well as some asp.net webapps.",
+                code: `<div class="card">\n  <h1>HTML & CSS</h1>\n  <style>\n    .card { display: flex; }\n  </style>\n</div>`
+            },
+            { 
+                l: 'Python', 
+                v: 10, 
+                c: '#b388aa', 
+                d: 'I have written scripts for automating workflows, as well as Blender plugins.',
+                code: `def greet_user():\n    print("Hello from Python!")\n\nif __name__ == "__main__":\n    greet_user()`
+            }
         ];
 
         const chartMatrix = document.getElementById('matrix-overlay');
@@ -700,47 +763,56 @@
         let chartAcc = 0;
 
         principleData.forEach(i => {
-    const ang = (chartAcc + i.v / 2) / 100 * 2 * Math.PI;
-    const tx = 300 + rad * Math.cos(ang), ty = 300 + rad * Math.sin(ang);
+            const ang = (chartAcc + i.v / 2) / 100 * 2 * Math.PI;
+            const tx = 300 + rad * Math.cos(ang), ty = 300 + rad * Math.sin(ang);
 
-    // Create Connector Line
-    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
-    line.setAttribute('x1', 300); line.setAttribute('y1', 300);
-    line.setAttribute('x2', tx); line.setAttribute('y2', ty);
-    line.setAttribute('stroke', 'rgba(255,255,255,0.1)');
-    line.setAttribute('stroke-width', '1');
-    cG.appendChild(line);
+            const codePanel = document.getElementById('code-snippet-panel');
+            const codeContent = document.getElementById('code-panel-content');
 
-    // Create Segment
-    const circ = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    circ.setAttribute('cx', 300); circ.setAttribute('cy', 300); circ.setAttribute('r', rad);
-    circ.setAttribute('class', 'segment');
-    circ.setAttribute('stroke', i.c);
-    circ.setAttribute('stroke-dasharray', `${(i.v/100)*circum} ${circum}`);
-    circ.setAttribute('stroke-dashoffset', -(chartAcc/100)*circum);
+            // Create Connector Line
+            const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+            line.setAttribute('x1', 300); line.setAttribute('y1', 300);
+            line.setAttribute('x2', tx); line.setAttribute('y2', ty);
+            line.setAttribute('stroke', 'rgba(255,255,255,0.1)');
+            line.setAttribute('stroke-width', '1');
+            cG.appendChild(line);
 
-    // HOVER LOGIC FIX
-    circ.onmouseenter = () => {
-        lbl.innerText = i.l;
-        val.innerText = i.v + '%'; // CHANGED: Now shows the actual percentage
-        det.innerText = i.d;
-        val.style.color = i.c;
-        line.setAttribute('stroke-width', '3');
-        line.setAttribute('stroke', i.c);
-    };
+            // Create Segment
+            const circ = document.createElementNS('http://www.w3.org/2000/svg','circle');
+            circ.setAttribute('cx', 300); circ.setAttribute('cy', 300); circ.setAttribute('r', rad);
+            circ.setAttribute('class', 'segment');
+            circ.setAttribute('stroke', i.c);
+            circ.setAttribute('stroke-dasharray', `${(i.v/100)*circum} ${circum}`);
+            circ.setAttribute('stroke-dashoffset', -(chartAcc/100)*circum);
 
-    circ.onmouseleave = () => {
-        lbl.innerText = 'Languages I know';
-        val.innerText = 'Experience';
-        det.innerText = 'Hover elements to inspect';
-        val.style.color = '#fff';
-        line.setAttribute('stroke-width', '1');
-        line.setAttribute('stroke', 'rgba(255,255,255,0.1)');
-    };
+            // HOVER LOGIC FIX
+            circ.onmouseenter = () => {
+                lbl.innerText = i.l;
+                val.innerText = i.v + '%'; // CHANGED: Now shows the actual percentage
+                det.innerText = i.d;
+                val.style.color = i.c;
+                line.setAttribute('stroke-width', '3');
+                line.setAttribute('stroke', i.c);
 
-    sG.appendChild(circ);
-    chartAcc += i.v;
-});
+                // --- NEW CODE PANEL ACTION ---
+                codeContent.textContent = i.code; // sets raw code safely without breaking HTML
+                codePanel.classList.add('active');
+            };
+
+            circ.onmouseleave = () => {
+                lbl.innerText = 'Languages I know';
+                val.innerText = 'Experience';
+                det.innerText = 'Hover elements to inspect';
+                val.style.color = '#fff';
+                line.setAttribute('stroke-width', '1');
+                line.setAttribute('stroke', 'rgba(255,255,255,0.1)');
+
+                codePanel.classList.remove('active');
+            };
+
+            sG.appendChild(circ);
+            chartAcc += i.v;
+        });
 
 // --- 5. SMART SCROLL OBSERVER ---
 const introSection = document.getElementById('intro');
