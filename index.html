@@ -514,7 +514,7 @@
                     
                     <!-- Center Info Card -->
                     <div class="absolute d-flex flex-column justify-content-center align-items-center text-center shadow-2xl" 
-                         style="position: absolute; z-index: 30; width: 220px; height: 220px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); pointer-events: none;">
+                         style="position: absolute; z-index: 30; width: 350px; height: 350px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); pointer-events: none;">
                         <div id="lbl" style="font-size: 1rem;  text-transform: uppercase; letter-spacing: 0.2em;">LANGUAGES I KNOW</div>
                         <div id="val" style="font-size: 2rem; font-weight: 900; margin: 4px 0; transition: color 0.3s;">Experience  </div>
                         <div id="det" style="font-size: 0.65rem; max-width: 150px;">Hover elements to inspect</div>
@@ -767,6 +767,55 @@
         const lbl = document.getElementById('lbl'), val = document.getElementById('val'), det = document.getElementById('det');
         let chartAcc = 0;
 
+        const wordsToHighlight = ['def', 'print', 'if', '__main__', 'greet_user', 'using', 'public', 'class', 'static', 'void', 'Console', 'System', 'out', 'println', 'style', 'display', 'flex'];
+
+        function getHighlightedCode(rawCode, targetWords, color) {
+            // Escape standard HTML first so things like <div class="card"> don't break
+            let escaped = rawCode
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+            // Replace target words with a styled span
+            targetWords.forEach(word => {
+                // Escape special regex characters in the word (like underscores)
+                const safeWord = word.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                const regex = new RegExp(`\\b${safeWord}\\b`, 'g');
+                escaped = escaped.replace(regex, `<span style="color: ${color}; font-weight: bold;">$&</span>`);
+            });
+
+            return escaped;
+        }
+
+        function renderHighlightedCode(container, rawCode, targetWords, color) {
+            // Clear out the previous snippet completely
+            container.innerHTML = '';
+
+            // Create a regular expression that catches any of our target words using word boundaries
+            // We sort words by length descending so longer words match before shorter fragments
+            const sortedWords = [...targetWords].sort((a, b) => b.length - a.length);
+            const escapedWords = sortedWords.map(w => w.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'));
+            const regex = new RegExp(`\\b(${escapedWords.join('|')})\\b`, 'g');
+
+            // Split the text while keeping the matched keywords
+            const parts = rawCode.split(regex);
+
+            parts.forEach(part => {
+                if (targetWords.includes(part)) {
+                    // It's a keyword! Create a styled span element
+                    const span = document.createElement('span');
+                    span.textContent = part;
+                    span.style.color = color;
+                    span.style.fontWeight = 'bold';
+                    container.appendChild(span);
+                } else {
+                    // It's regular code, append it safely as a plain text node
+                    const textNode = document.createTextNode(part);
+                    container.appendChild(textNode);
+                }
+            });
+        }
+
         principleData.forEach(i => {
             const ang = (chartAcc + i.v / 2) / 100 * 2 * Math.PI;
             const tx = 300 + rad * Math.cos(ang), ty = 300 + rad * Math.sin(ang);
@@ -790,17 +839,21 @@
             circ.setAttribute('stroke-dasharray', `${(i.v/100)*circum} ${circum}`);
             circ.setAttribute('stroke-dashoffset', -(chartAcc/100)*circum);
 
-            // HOVER LOGIC FIX
+                        // HOVER LOGIC FIX
             circ.onmouseenter = () => {
                 lbl.innerText = i.l;
-                val.innerText = i.v + '%'; // CHANGED: Now shows the actual percentage
+                val.innerText = i.v + '%';
                 det.innerText = i.d;
                 val.style.color = i.c;
                 line.setAttribute('stroke-width', '3');
                 line.setAttribute('stroke', i.c);
 
-                // --- NEW CODE PANEL ACTION ---
-                codeContent.textContent = i.code; // sets raw code safely without breaking HTML
+                // --- REWRITTEN CODE PANEL ACTION ---
+                const codePanel = document.getElementById('code-snippet-panel');
+                const codeContent = document.getElementById('code-panel-content');
+                
+                // Safely populates the container directly via DOM elements 
+                renderHighlightedCode(codeContent, i.code, wordsToHighlight, i.c); 
                 codePanel.classList.add('active');
             };
 
@@ -812,6 +865,7 @@
                 line.setAttribute('stroke-width', '1');
                 line.setAttribute('stroke', 'rgba(255,255,255,0.1)');
 
+                const codePanel = document.getElementById('code-snippet-panel');
                 codePanel.classList.remove('active');
             };
 
