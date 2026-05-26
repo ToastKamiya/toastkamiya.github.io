@@ -174,6 +174,9 @@
             align-items: center; /* Vertically center them if they have different heights */
             flex-wrap: wrap; /* Allows wrapping if you add too many icons */
             gap: 10px; /* Space between the icons */
+            padding: 10px 10px 10px 10px;
+            background-color: #4e4ea2;
+            border-radius: 12px;
         }
 
         .tech-icons img {
@@ -181,6 +184,13 @@
             width: 45px;
             height: 45px;
             object-fit: contain; /* Ensures the image scales nicely within the box */
+        }
+
+        .tech-icon-header{
+            color:white;
+            font-weight:bold;
+            text-align:center;
+            font-size:1.2rem;
         }
 
         .interactive-panel { background: black; box-shadow: 0 10px 30px black; outline: 5px solid white; }
@@ -240,7 +250,7 @@
           opacity: 1; /* Set transparency (for mouse-over effects on hover) */
           -webkit-transition: .2s; /* 0.2 seconds transition on hover */
           transition: opacity .2s;
-          border-radius:6px;
+          border-radius:10px;
         }
 
         /* Mouse-over effects */
@@ -439,7 +449,7 @@
                     <h2>ToastCut</h2>
                     <div class="img-placeholder" style="background-image: url('https://raw.githubusercontent.com/ToastKamiya/toastcut/main/assets/screenshot.png')"></div>
 
-                    <!-- NEW ICON CONTAINER ADDED HERE -->
+                    <div class="tech-icon-header">Applied languages and software:</div>
                     <div class="tech-icons mb-2">
                         <!-- Example Icons (Replace these with your actual image paths) -->
                         <img src="https://abrudz.github.io/logos/JS.svg" alt="Javascript" style="width: 40px; height: 40px; margin-right: 5px;">
@@ -458,7 +468,7 @@
                     <h2>RaceTracks</h2>
                     <div class="img-placeholder" style="background-image:  url('https://prawnhub.org/files/s3project.png')"></div>
 
-                    <!-- NEW ICON CONTAINER ADDED HERE -->
+                    <div class="tech-icon-header">Applied languages and software:</div>
                     <div class="tech-icons mb-2">
                         <!-- Example Icons (Replace these with your actual image paths) -->
                         <img src="https://abrudz.github.io/logos/PHP.svg" alt="PHP" style="width: 40px; height: 40px; margin-right: 5px;">
@@ -476,7 +486,7 @@
                     <h2>Fortress Challenge</h2>
                     <div class="img-placeholder" style="background-image: url('https://prawnhub.org/files/Android_10.png')"></div>
 
-                    <!-- NEW ICON CONTAINER ADDED HERE -->
+                    <div class="tech-icon-header">Applied languages and software:</div>
                     <div class="tech-icons mb-2">
                         <!-- Example Icons (Replace these with your actual image paths) -->
                         <img src="https://images.seeklogo.com/logo-png/36/1/c-sharp-c-logo-png_seeklogo-363285.png" alt="C Sharp" style="width: 40px; height: 40px; margin-right: 5px;">
